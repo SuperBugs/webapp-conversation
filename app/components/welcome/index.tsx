@@ -132,10 +132,6 @@ const Welcome: FC<IWelcomeProps> = ({
     const inputLens = Object.values(inputs).length
     const promptVariablesLens = promptConfig.prompt_variables.length
     const emytyInput = inputLens < promptVariablesLens || Object.values(inputs).filter(v => v === '').length > 0
-    if (emytyInput) {
-      logError(t('app.errorMessage.valueOfVarRequired'))
-      return false
-    }
     return true
   }
 
