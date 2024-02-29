@@ -41,6 +41,7 @@
     "next": "13.4.0",
     "rc-textarea": "^1.5.3",
     "react": "18.2.0",
+    "react-cookie": "^7.1.0",
     "react-dom": "18.2.0",
     "react-error-boundary": "^4.0.2",
     "react-headless-pagination": "^1.1.4",
@@ -70,6 +71,7 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "lint-staged": "^13.2.2",
     "postcss": "^8.4.21",
+    "react-cookies": "^0.1.1",
     "tailwindcss": "^3.2.7"
   },
   "lint-staged": {

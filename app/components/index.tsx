@@ -22,6 +22,7 @@ import AppUnavailable from '@/app/components/app-unavailable'
 import { API_KEY, APP_ID, APP_INFO, isShowPrompt, promptTemplate } from '@/config'
 import type { Annotation as AnnotationType } from '@/types/log'
 import { addFileInfos, sortAgentSorts } from '@/utils/tools'
+import Cookies from 'js-cookie'
 
 const Main: FC = () => {
   const { t } = useTranslation()
@@ -224,7 +225,19 @@ const Main: FC = () => {
 
         // handle current conversation id
         const { data: conversations } = conversationData as { data: ConversationItem[] }
-        const _conversationId = getConversationIdFromStorage(APP_ID)
+        // http://localhost:3000/?conversition_id=f4f0c538-01d4-4816-a4cf-5a3903d71db6
+        const searchParams = new URLSearchParams(window.location.search);
+        //console.log(searchParams)
+        const paramValue = searchParams.get('conversition_id');
+        const session_id = searchParams.get('session_id');
+        //console.log(paramValue)
+        var _conversationId = getConversationIdFromStorage(APP_ID)
+        if (paramValue != null) {
+          _conversationId = paramValue
+        }
+        if (session_id != null) {
+          Cookies.set("session_id", session_id, { path: '/api' })
+        }
         const isNotNewConversation = conversations.some(item => item.id === _conversationId)
 
         // fetch new conversation info
@@ -565,29 +578,12 @@ const Main: FC = () => {
 
   return (
     <div className='bg-gray-100'>
-      <Header
-        title={APP_INFO.title}
-        isMobile={isMobile}
-        onShowSideBar={showSidebar}
-        onCreateNewChat={() => handleConversationIdChange('-1')}
-      />
       <div className="flex rounded-t-2xl bg-white overflow-hidden">
-        {/* sidebar */}
-        {!isMobile && renderSidebar()}
-        {isMobile && isShowSidebar && (
-          <div className='fixed inset-0 z-50'
-            style={{ backgroundColor: 'rgba(35, 56, 118, 0.2)' }}
-            onClick={hideSidebar}
-          >
-            <div className='inline-block' onClick={e => e.stopPropagation()}>
-              {renderSidebar()}
-            </div>
-          </div>
-        )}
+
         {/* main */}
         <div className='flex-grow flex flex-col h-[calc(100vh_-_3rem)] overflow-y-auto'>
           <ConfigSence
-            conversationName={conversationName}
+            conversationName=""
             hasSetInputs={hasSetInputs}
             isPublicVersion={isShowPrompt}
             siteInfo={APP_INFO}
