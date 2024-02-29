@@ -25,6 +25,11 @@ import { addFileInfos, sortAgentSorts } from '@/utils/tools'
 import Cookies from 'js-cookie'
 
 const Main: FC = () => {
+  const searchParams = new URLSearchParams(window.location.search);
+  const session_id = searchParams.get('session_id');
+  if (session_id != null) {
+    Cookies.set("session_id", session_id, { path: '/api' })
+  }
   const { t } = useTranslation()
   const media = useBreakpoints()
   const isMobile = media === MediaType.mobile
@@ -62,7 +67,7 @@ const Main: FC = () => {
   /*
   * conversation info
   */
-  const {
+  var {
     conversationList,
     setConversationList,
     currConversationId,
@@ -95,6 +100,8 @@ const Main: FC = () => {
 
     return isChatStarted
   })()
+
+  const paramValue = searchParams.get('params');
 
   const conversationName = currConversationInfo?.name || t('app.chat.newChatDefaultName') as string
   const conversationIntroduction = currConversationInfo?.introduction || ''
@@ -227,10 +234,10 @@ const Main: FC = () => {
         const { data: conversations } = conversationData as { data: ConversationItem[] }
         // http://localhost:3000/?conversition_id=f4f0c538-01d4-4816-a4cf-5a3903d71db6
         const searchParams = new URLSearchParams(window.location.search);
-        //console.log(searchParams)
+        console.log(searchParams)
         const paramValue = searchParams.get('conversition_id');
         const session_id = searchParams.get('session_id');
-        //console.log(paramValue)
+        console.log(paramValue)
         var _conversationId = getConversationIdFromStorage(APP_ID)
         if (paramValue != null) {
           _conversationId = paramValue
@@ -264,6 +271,7 @@ const Main: FC = () => {
         setInited(true)
       }
       catch (e: any) {
+        console.log(e)
         if (e.status === 404) {
           setAppUnavailable(true)
         }
@@ -331,12 +339,22 @@ const Main: FC = () => {
   }
 
   const handleSend = async (message: string, files?: VisionFile[]) => {
+    const res: Record<string, any> = {}
+    if (paramValue != null) {
+      var params = JSON.parse(paramValue);
+      console.log(params)
+      if (promptConfig) {
+        promptConfig.prompt_variables.forEach((item) => {
+          res[item.key] = params[item.key]
+        })
+      }
+    }
     if (isResponsing) {
       notify({ type: 'info', message: t('app.errorMessage.waitForResponse') })
       return
     }
     const data: Record<string, any> = {
-      inputs: currInputs,
+      inputs: res ? res : currInputs,
       query: message,
       conversation_id: isNewConversation ? null : currConversationId,
     }
@@ -582,20 +600,10 @@ const Main: FC = () => {
 
         {/* main */}
         <div className='flex-grow flex flex-col h-[calc(100vh_-_3rem)] overflow-y-auto'>
-          <ConfigSence
-            conversationName=""
-            hasSetInputs={hasSetInputs}
-            isPublicVersion={isShowPrompt}
-            siteInfo={APP_INFO}
-            promptConfig={promptConfig}
-            onStartChat={handleStartChat}
-            canEidtInpus={canEditInpus}
-            savedInputs={currInputs as Record<string, any>}
-            onInputsChange={setCurrInputs}
-          ></ConfigSence>
+
 
           {
-            hasSetInputs && (
+            true && (
               <div className='relative grow h-[200px] pc:w-[794px] max-w-full mobile:w-full pb-[66px] mx-auto mb-3.5 overflow-hidden'>
                 <div className='h-full overflow-y-auto' ref={chatListDomRef}>
                   <Chat

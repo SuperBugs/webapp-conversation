@@ -40,8 +40,20 @@ const Welcome: FC<IWelcomeProps> = ({
   const hasVar = promptConfig.prompt_variables.length > 0
   const [isFold, setIsFold] = useState<boolean>(true)
   const [inputs, setInputs] = useState<Record<string, any>>((() => {
-    if (hasSetInputs)
-      return savedInputs
+    const searchParams = new URLSearchParams(window.location.search);
+    const paramValue = searchParams.get('params');
+    console.log(paramValue)
+    if (paramValue != null) {
+      var params = JSON.parse(paramValue);
+      console.log(params)
+      const res: Record<string, any> = {}
+      if (promptConfig) {
+        promptConfig.prompt_variables.forEach((item) => {
+          res[item.key] = params[item.key]
+        })
+      }
+      return res
+    }
 
     const res: Record<string, any> = {}
     if (promptConfig) {
@@ -51,19 +63,10 @@ const Welcome: FC<IWelcomeProps> = ({
     }
     return res
   })())
+
   useEffect(() => {
-    if (!savedInputs) {
-      const res: Record<string, any> = {}
-      if (promptConfig) {
-        promptConfig.prompt_variables.forEach((item) => {
-          res[item.key] = ''
-        })
-      }
-      setInputs(res)
-    }
-    else {
-      setInputs(savedInputs)
-    }
+    //handleChat()
+    handleChat()
   }, [savedInputs])
 
   const highLightPromoptTemplate = (() => {
@@ -129,6 +132,7 @@ const Welcome: FC<IWelcomeProps> = ({
   }
 
   const canChat = () => {
+    console.log(inputs)
     const inputLens = Object.values(inputs).length
     const promptVariablesLens = promptConfig.prompt_variables.length
     const emytyInput = inputLens < promptVariablesLens || Object.values(inputs).filter(v => v === '').length > 0
